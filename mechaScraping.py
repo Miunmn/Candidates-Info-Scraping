@@ -1,12 +1,22 @@
 from selenium import webdriver
 import urllib
+from selenium.webdriver.support import expected_conditions as EC
+
 from selenium.webdriver.common.keys import Keys
+import time
+from selenium.webdriver.support.ui import WebDriverWait
+
+from selenium.webdriver.common.by import By
 
 
 def extraer_la_data(driver_):
+    #element = WebDriverWait(driver, 5).until(
+    #EC.presence_of_element_located((By.CLASS_NAME, "ConteinerJNE")))
     print("Entro a la funcion")
     print(driver_)
-    datos = driver_.find_elements_by_class_name("element__label") 
+    datos = driver_.find_elements_by_class_name("element__label ") 
+    
+    print("hola")
     print(len(datos))
     for dato in datos:
         print(dato.text)
@@ -44,16 +54,22 @@ button_vermas = driver.find_elements_by_class_name("VotonesVerMas")
 len_vermas = len(button_vermas)
 
 
+
+
+window_parent = driver.window_handles[0]
 for button in button_vermas:
     button.click()
     button_HDV = driver.find_elements_by_xpath('//*[@title="Ver Hoja de vida del candidato"]')
     for HDV in button_HDV:
         HDV.click()
-        p = driver.current_window_handle
-        chwd = driver.window_handles
-        for w in chwd:
-            if(w!=p):
-                driver.switch_to.window(w)
-                #extraer_la_data(driver)
+        window_after = driver.window_handles[1]
+        driver.switch_to_window(window_after)
+        extraer_la_data(driver)
+        time.sleep(5) 
+        driver.close()
+        driver.switch_to_window(window_parent)
+    button.click()
 
-        break
+
+
+
