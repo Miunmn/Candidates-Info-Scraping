@@ -57,12 +57,3 @@ for button in button_vermas:
                 #extraer_la_data(driver)
 
         break
-
-        
-        """div = driver.find_element_by_class_name("buttons__content")
-        button_close = div.find_elements_by_tag_name("button")
-        button_close[0].click()"""
-        print("Data extraida de candidato")
-
-
-#driver.close()
