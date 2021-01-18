@@ -31,6 +31,8 @@ def extraer_dato_trayectoria_partidaria(seccion_):
         datos1 = [date.text for date in article.find_elements_by_class_name("element__label ")]
         '''for e in datos1:
             print(e)'''
+    
+    print("lista_trayectoria_partidaria:", lista_trayectoria_partidaria)
     return lista_trayectoria_partidaria
 
 def extraer_info_adicional(seccion):
@@ -51,7 +53,7 @@ def extraer_info_adicional(seccion):
     return lista_info_adicional
 
 def extraer_datos_academicos(seccion):
-    time.sleep(1)
+    time.sleep(2)
     datos = [element.text for element in seccion.find_elements_by_class_name("element__label ")]
     datos_ = seccion.find_elements_by_class_name("element__label ")
 
@@ -106,7 +108,7 @@ def extraer_datos_academicos(seccion):
         for k, v in e.items():
             print(k, ":", v)
     print("\n")'''
-    return lista_estudios_universitarios
+    return diccionario_academico
 
 def extraer_datos_personales(seccion):
     lista_datos_personales = list()
@@ -198,6 +200,8 @@ def extraer_datos_laborales(seccion):
     lista_registro_laboral = list()
     for articulo in seccion.find_elements_by_tag_name("article"):
         datos = [element.text for element in articulo.find_elements_by_class_name("element__label ")]
+        print("datos[13]")
+        print(datos[13])
         lista_registro_laboral.append({
             'nombre': datos[1],
             'ocupacion': datos[3],
@@ -303,7 +307,7 @@ def extraer_la_data(driver_):
     print("Entro a la funcion")
     retorno = list ()
     driver_.refresh()
-    time.sleep(1)
+    time.sleep(2)
 
     seccion1_datos_personales = driver_.find_element_by_id("datos_personales")
     datos_personales = extraer_datos_personales(seccion1_datos_personales)
@@ -388,8 +392,11 @@ def llenar_Json_distrito_electoral(driver_):
         button.click()
         #tabla = driver_.find_elements_by_xpath('//*[@ng-repeat]="e in oResultados"')
         tabla_actual = procede_[indice]
+        procede_Flag = bool
         if (procede_[indice].find_element_by_class_name("ColumT-15.ng-binding")).text == "IMPROCEDENTE":
-            continue
+            print("IMPROCEDENTEEEEE")
+            procede_Flag = True
+            #continue
         #print("len(procede_)")
         #print(len(procede_))
         #for item in procede_:
@@ -399,12 +406,17 @@ def llenar_Json_distrito_electoral(driver_):
         
         button_HDV = driver_.find_elements_by_xpath('//*[@title="Ver Hoja de vida del candidato"]')
         for HDV in button_HDV:
+            if procede_Flag == True:
+                break
             if HDV.get_attribute('aria-hidden') == "true":
                 continue
             HDV.click()
             window_after = driver_.window_handles[1]
             driver_.switch_to_window(window_after)
             datosJson_item = extraer_la_data(driver)
+            with open("auxiliar.json", 'r+') as fp:                
+                json.dump(datosJson_item , fp, ensure_ascii=False)
+
             datosJson.append(datosJson_item)
             # time.sleep(5)
             driver_.close()
@@ -415,8 +427,12 @@ def llenar_Json_distrito_electoral(driver_):
 
 
 if __name__ == "__main__":
+      
+    
     driver = webdriver.Firefox()
     driver.get("https://plataformaelectoral.jne.gob.pe/ListaDeCandidatos/Index")
+    
+    (driver.page_source).encode('utf-8')
     
     driver.refresh()
     driver.refresh()
@@ -437,6 +453,8 @@ if __name__ == "__main__":
     congresal.click()
     # 27 JSONs
     #driver.refresh()
+
+
     time.sleep(1)
     distritos_electoral_div  = driver.find_element_by_id("cboDepartamento")
     
@@ -447,7 +465,7 @@ if __name__ == "__main__":
     
     nombreJson_file = ""
     #len(lista_distritos_electorales== 27
-    for i in range(12,len(lista_distritos_electorales)):
+    for i in range(1,len(lista_distritos_electorales)):
         lista_distritos_electorales[i].click()
         button_buscar = driver.find_elements_by_class_name("button")
         buscar_normal = button_buscar[0].click()
@@ -455,5 +473,7 @@ if __name__ == "__main__":
         datosJson = llenar_Json_distrito_electoral(driver)
         
         nombreJson_file = "dataC" + str(i)+ ".json"
+        print("nombreJson_file")
+        print(nombreJson_file)
         with open(nombreJson_file, 'w')as fp:
-            json.dump(datosJson , fp)   
+            json.dump(datosJson , fp, ensure_ascii=False)
